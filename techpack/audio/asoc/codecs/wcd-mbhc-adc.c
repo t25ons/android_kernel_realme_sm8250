@@ -1411,6 +1411,11 @@ static irqreturn_t wcd_mbhc_adc_hs_ins_irq(int irq, void *data)
 #endif /* OPLUS_ARCH_EXTENDS */
 
 	WCD_MBHC_RSC_LOCK(mbhc);
+
+	if (!(test_bit(WCD_MBHC_ELEC_HS_INS, &mbhc->intr_status))) {
+		WCD_MBHC_RSC_UNLOCK(mbhc);
+		return IRQ_HANDLED;
+	}
 	/*
 	 * If current plug is headphone then there is no chance to
 	 * get ADC complete interrupt, so connected cable should be
