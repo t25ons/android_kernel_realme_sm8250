@@ -1333,6 +1333,7 @@ static int msm_cvp_thread_fence_run(void *data)
 				}
 				rc = synx_wait(synx_obj, timeout_ms);
 				if (rc) {
+					synx_release(synx_obj);
 					dprintk(CVP_ERR,
 						"%s: synx_wait failed\n",
 						__func__);
@@ -1385,6 +1386,7 @@ static int msm_cvp_thread_fence_run(void *data)
 		}
 		rc = synx_signal(synx_obj, synx_state);
 		if (rc) {
+			synx_release(synx_obj);
 			dprintk(CVP_ERR, "%s: synx_signal failed\n", __func__);
 			goto exit;
 		}
@@ -1414,6 +1416,7 @@ static int msm_cvp_thread_fence_run(void *data)
 				}
 				rc = synx_wait(synx_obj, timeout_ms);
 				if (rc) {
+					synx_release(synx_obj);
 					dprintk(CVP_ERR,
 						"%s: synx_wait %d failed\n",
 						__func__, i<<1);
@@ -1476,6 +1479,7 @@ static int msm_cvp_thread_fence_run(void *data)
 				}
 				rc = synx_signal(synx_obj, synx_state);
 				if (rc) {
+					synx_release(synx_obj);
 					dprintk(CVP_ERR,
 						"%s: synx_signal %d failed\n",
 						__func__, i<<1);
