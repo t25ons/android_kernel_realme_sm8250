@@ -59,7 +59,9 @@ static LIST_HEAD(regulator_supply_alias_list);
 static bool has_full_constraints;
 static bool debug_suspend;
 
+#ifdef CONFIG_DEBUG_FS
 static struct dentry *debugfs_root;
+#endif
 
 /*
  * struct regulator_map
