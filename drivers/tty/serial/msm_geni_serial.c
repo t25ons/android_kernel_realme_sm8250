@@ -666,12 +666,7 @@ static int msm_geni_serial_ioctl(struct uart_port *uport, unsigned int cmd,
 
 static void msm_geni_serial_break_ctl(struct uart_port *uport, int ctl)
 {
-	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);
-
 	if (!uart_console(uport) && device_pending_suspend(uport)) {
-		IPC_LOG_MSG(port->ipc_log_misc,
-				"%s.Device is suspended, %s\n",
-				__func__, current->comm);
 		return;
 	}
 
@@ -775,7 +770,6 @@ static struct msm_geni_serial_port *get_port_from_line(int line,
 static int msm_geni_serial_power_on(struct uart_port *uport)
 {
 	int ret = 0;
-	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);
 
 	if (!pm_runtime_enabled(uport->dev)) {
 		if (pm_runtime_status_suspended(uport->dev)) {
@@ -783,15 +777,9 @@ static int msm_geni_serial_power_on(struct uart_port *uport)
 			struct tty_port *tport = &state->port;
 			int lock = mutex_trylock(&tport->mutex);
 
-			IPC_LOG_MSG(port->ipc_log_pwr,
-					"%s:Manual resume\n", __func__);
 			pm_runtime_disable(uport->dev);
 			ret = msm_geni_serial_runtime_resume(uport->dev);
-			if (ret) {
-				IPC_LOG_MSG(port->ipc_log_pwr,
-					"%s:Manual RPM CB failed %d\n",
-								__func__, ret);
-			} else {
+			if (!ret) {
 				pm_runtime_get_noresume(uport->dev);
 				pm_runtime_set_active(uport->dev);
 			}
@@ -802,7 +790,6 @@ static int msm_geni_serial_power_on(struct uart_port *uport)
 	} else {
 		ret = pm_runtime_get_sync(uport->dev);
 		if (ret < 0) {
-			IPC_LOG_MSG(port->ipc_log_pwr, "%s Err\n", __func__);
 			WARN_ON_ONCE(1);
 			pm_runtime_put_noidle(uport->dev);
 			pm_runtime_set_suspended(uport->dev);
@@ -814,12 +801,9 @@ static int msm_geni_serial_power_on(struct uart_port *uport)
 
 static void msm_geni_serial_power_off(struct uart_port *uport)
 {
-	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);
 	int usage_count = atomic_read(&uport->dev->power.usage_count);
 
 	if (!usage_count) {
-		IPC_LOG_MSG(port->ipc_log_pwr, "%s: Usage Count is already 0\n",
-								__func__);
 		return;
 	}
 	pm_runtime_mark_last_busy(uport->dev);
@@ -1433,12 +1417,8 @@ static void stop_tx_sequencer(struct uart_port *uport)
 
 static void msm_geni_serial_stop_tx(struct uart_port *uport)
 {
-	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);
-
 	if (!uart_console(uport) && device_pending_suspend(uport)) {
 		dev_err(uport->dev, "%s.Device is suspended.\n", __func__);
-		IPC_LOG_MSG(port->ipc_log_misc,
-				"%s.Device is suspended.\n", __func__);
 		return;
 	}
 	stop_tx_sequencer(uport);
@@ -1729,18 +1709,10 @@ exit_rx_seq:
 
 static void msm_geni_serial_stop_rx(struct uart_port *uport)
 {
-	struct msm_geni_serial_port *port = GET_DEV_PORT(uport);
-	int ret;
-
 	if (!uart_console(uport) && device_pending_suspend(uport)) {
-		IPC_LOG_MSG(port->ipc_log_misc,
-				"%s.Device is suspended.\n", __func__);
 		return;
 	}
-	ret = stop_rx_sequencer(uport);
-	if (ret)
-		IPC_LOG_MSG(port->ipc_log_misc, "%s: stop rx failed %d\n",
-							__func__, ret);
+	stop_rx_sequencer(uport);
 }
 
 static int handle_rx_hs(struct uart_port *uport,
