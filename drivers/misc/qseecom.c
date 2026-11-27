@@ -4345,8 +4345,8 @@ err:
 				data->client.sec_buf_fd[i].size,
 				data->client.sec_buf_fd[i].vbase,
 				data->client.sec_buf_fd[i].pbase);
-			memset(&data->client.sec_buf_fd[i], 0,
-				sizeof(struct qseecom_sec_buf_fd_info));
+		memset(&data->client.sec_buf_fd[i], 0,
+			sizeof(struct qseecom_sec_buf_fd_info));
 	}
 	if (!IS_ERR_OR_NULL(sg_ptr)) {
 		qseecom_dmabuf_unmap(sg_ptr, attach, dmabuf);
